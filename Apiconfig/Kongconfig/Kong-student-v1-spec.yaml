@@ -1,455 +1,62 @@
 _format_version: "3.0"
 plugins:
-- config:
-    echo_downstream: false
-    generator: uuid
-    header_name: x-uos-correlation-id
-  enabled: true
-  name: correlation-id
-  ordering:
-    before:
-      access:
-      - oas-validation
-  protocols:
-  - grpc
-  - grpcs
-  - http
-  - https
-- config:
-    content_type: application/json
-    custom_fields_by_lua: []
-    flush_timeout: 2
-    headers:
-      Authorization: Splunk 1fef7417-3fe0-46a1-801b-04164660a59b
-    http_endpoint: https://prd-p-s3ws6.splunkcloud.com:8088/services/collector/raw
-    keepalive: 60000
-    method: POST
-    queue:
-      initial_retry_delay: 0.01
-      max_batch_size: 10
-      max_bytes: null
-      max_coalescing_delay: 1
-      max_entries: 10000
-      max_retry_delay: 60
-      max_retry_time: 60
-    queue_size: null
-    retry_count: null
-    timeout: 10000
-  enabled: true
-  name: http-log
-  protocols:
-  - grpc
-  - grpcs
-  - http
-  - https
-- config:
-    allow:
-    - 49.249.17.98
-    deny: null
-    message: The service is currently unavailable.
-    status: null
-  enabled: true
-  name: ip-restriction
-  protocols:
-  - http
-  - https
-  - tcp
-  - tls
-  - grpc
-  - grpcs
-- config:
-    day: null
-    error_code: 429
-    error_message: API rate limit exceeded
-    fault_tolerant: true
-    header_name: null
-    hide_client_headers: false
-    hour: null
-    limit_by: consumer
-    minute: null
-    month: null
-    path: null
-    policy: local
-    redis_database: 0
-    redis_host: null
-    redis_password: null
-    redis_port: 6379
-    redis_server_name: null
-    redis_ssl: false
-    redis_ssl_verify: false
-    redis_timeout: 2000
-    redis_username: null
-    second: 100
-    year: null
-  enabled: true
-  name: rate-limiting
-  protocols:
-  - grpc
-  - grpcs
-  - http
-  - https
-- config:
-    allowed_payload_size: 100
-    require_content_length: false
-    size_unit: kilobytes
-  enabled: true
-  name: request-size-limiting
-  protocols:
-  - grpc
-  - grpcs
-  - http
-  - https
-services:
-- host: integration.dev-api.shef.ac.uk
-  id: c3004a9c-c46e-57e7-8baf-e23d728fc9bb
-  name: student-api-v1
-  path: /
-  plugins:
   - config:
-      anonymous: null
-      hide_credentials: false
-      key_in_body: false
-      key_in_header: true
-      key_in_query: true
-      key_names:
-      - apikey
-      run_on_preflight: true
+      echo_downstream: false
+      generator: uuid
+      header_name: x-uos-correlation-id
     enabled: true
-    name: key-auth
+    name: correlation-id
+    ordering:
+      before:
+        access:
+          - oas-validation
     protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-    - ws
-    - wss
+      - grpc
+      - grpcs
+      - http
+      - https
   - config:
-      functions:
-      - |-
-        return function(status, body, headers)
-            local new_body = {}
-
-            if status == 400 then
-                new_body = {
-                    code = 10000,
-                    description = "Required fields are missing or invalid data specified in the request. Please refer the swagger specification for more details",
-                    source = "Middleware",
-                    message = body.message,
-                    type = "Validation"
-                }
-            elseif status == 401 then
-                new_body = {
-                    code = 10001,
-                    description = "Unauthorised request",
-                    source = "Middleware",
-                    message = body.message,
-                    type = "Validation"
-                }
-            elseif status == 403 then
-                new_body = {
-                    code = 10002,
-                    description = "Forbidden request",
-                    source = "Middleware",
-                    message = body.message,
-                    type = "Validation"
-                }
-            elseif status == 500 then
-                new_body = {
-                    code = 20000,
-                    description = "Internal Server Error",
-                    source = "Error",
-                    message = body.message,
-                    type = "Server error"
-                }
-          elseif status == 503 then
-                new_body = {
-                    code = 20000,
-                    description = "Internal Server Error",
-                    source = "Error",
-                    message = body.message,
-                    type = "System"
-                }
-            else
-                -- For any other status codes, return the original body
-                return status, body, headers
-            end
-
-            return status, new_body, headers
-        end
-    enabled: true
-    name: exit-transformer
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  - config:
-      anonymous: null
-      audience: null
-      audience_claim:
-      - aud
-      audience_required: null
-      auth_methods:
-      - bearer
-      authenticated_groups_claim: null
-      authorization_cookie_domain: null
-      authorization_cookie_http_only: true
-      authorization_cookie_name: authorization
-      authorization_cookie_path: /
-      authorization_cookie_same_site: Default
-      authorization_cookie_secure: null
-      authorization_endpoint: null
-      authorization_query_args_client: null
-      authorization_query_args_names: null
-      authorization_query_args_values: null
-      authorization_rolling_timeout: 600
-      bearer_token_cookie_name: null
-      bearer_token_param_type:
-      - header
-      - query
-      - body
-      by_username_ignore_case: false
-      cache_introspection: true
-      cache_token_exchange: true
-      cache_tokens: true
-      cache_tokens_salt: dC1MclTHUAJ8SGzPH90fEMAFN4xFZ9yj
-      cache_ttl: 3600
-      cache_ttl_max: null
-      cache_ttl_min: null
-      cache_ttl_neg: null
-      cache_ttl_resurrect: null
-      cache_user_info: true
-      client_alg: null
-      client_arg: client_id
-      client_auth: null
-      client_credentials_param_type:
-      - header
-      - query
-      - body
-      client_id: []
-      client_jwk: null
-      client_secret: []
-      consumer_by:
-      - username
-      - custom_id
-      consumer_claim: null
-      consumer_optional: false
-      credential_claim:
-      - sub
-      disable_session: null
-      discovery_headers_names: null
-      discovery_headers_values: null
-      display_errors: false
-      domains: null
-      downstream_access_token_header: null
-      downstream_access_token_jwk_header: null
-      downstream_headers_claims: null
-      downstream_headers_names: null
-      downstream_id_token_header: null
-      downstream_id_token_jwk_header: null
-      downstream_introspection_header: null
-      downstream_introspection_jwt_header: null
-      downstream_refresh_token_header: null
-      downstream_session_id_header: null
-      downstream_user_info_header: null
-      downstream_user_info_jwt_header: null
-      enable_hs_signatures: false
-      end_session_endpoint: null
-      expose_error_code: true
-      extra_jwks_uris: null
-      forbidden_destroy_session: true
-      forbidden_error_message: Forbidden
-      forbidden_redirect_uri: null
-      groups_claim:
-      - groups
-      groups_required: null
-      hide_credentials: false
-      http_proxy: null
-      http_proxy_authorization: null
-      http_version: 1.1
-      https_proxy: null
-      https_proxy_authorization: null
-      id_token_param_name: null
-      id_token_param_type:
-      - header
-      - query
-      - body
-      ignore_signature: []
-      introspect_jwt_tokens: false
-      introspection_accept: application/json
-      introspection_check_active: true
-      introspection_endpoint: null
-      introspection_endpoint_auth_method: null
-      introspection_headers_client: null
-      introspection_headers_names: null
-      introspection_headers_values: null
-      introspection_hint: access_token
-      introspection_post_args_client: null
-      introspection_post_args_names: null
-      introspection_post_args_values: null
-      introspection_token_param_name: token
-      issuer: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_pmhLhUYdx
-      issuers_allowed: null
-      jwt_session_claim: sid
-      jwt_session_cookie: null
-      keepalive: true
-      leeway: 0
-      login_action: upstream
-      login_methods:
-      - authorization_code
-      login_redirect_mode: fragment
-      login_redirect_uri: null
-      login_tokens:
-      - id_token
-      logout_methods:
-      - POST
-      - DELETE
-      logout_post_arg: null
-      logout_query_arg: null
-      logout_redirect_uri: null
-      logout_revoke: false
-      logout_revoke_access_token: true
-      logout_revoke_refresh_token: true
-      logout_uri_suffix: null
-      max_age: null
-      mtls_introspection_endpoint: null
-      mtls_revocation_endpoint: null
-      mtls_token_endpoint: null
-      no_proxy: null
-      password_param_type:
-      - header
-      - query
-      - body
-      preserve_query_args: false
-      proof_of_possession_auth_methods_validation: true
-      proof_of_possession_mtls: "off"
-      pushed_authorization_request_endpoint: null
-      pushed_authorization_request_endpoint_auth_method: null
-      redirect_uri: null
-      rediscovery_lifetime: 30
-      refresh_token_param_name: null
-      refresh_token_param_type:
-      - header
-      - query
-      - body
-      refresh_tokens: true
-      require_proof_key_for_code_exchange: null
-      require_pushed_authorization_requests: null
-      resolve_distributed_claims: false
-      response_mode: query
-      response_type:
-      - code
-      reverify: false
-      revocation_endpoint: null
-      revocation_endpoint_auth_method: null
-      revocation_token_param_name: token
-      roles_claim:
-      - roles
-      roles_required: null
-      run_on_preflight: true
-      scopes:
-      - openid
-      scopes_claim:
-      - scope
-      scopes_required: null
-      search_user_info: false
-      session_absolute_timeout: 86400
-      session_audience: default
-      session_compressor: none
-      session_cookie_domain: null
-      session_cookie_http_only: true
-      session_cookie_maxsize: 4000
-      session_cookie_name: session
-      session_cookie_path: /
-      session_cookie_renew: 600
-      session_cookie_same_site: Lax
-      session_cookie_secure: null
-      session_enforce_same_subject: false
-      session_hash_storage_key: false
-      session_hash_subject: false
-      session_idling_timeout: 900
-      session_memcached_host: 127.0.0.1
-      session_memcached_port: 11211
-      session_memcached_prefix: null
-      session_memcached_socket: null
-      session_redis_cluster_max_redirections: null
-      session_redis_cluster_nodes: null
-      session_redis_connect_timeout: null
-      session_redis_host: 127.0.0.1
-      session_redis_password: null
-      session_redis_port: 6379
-      session_redis_prefix: null
-      session_redis_read_timeout: null
-      session_redis_send_timeout: null
-      session_redis_server_name: null
-      session_redis_socket: null
-      session_redis_ssl: false
-      session_redis_ssl_verify: false
-      session_redis_username: null
-      session_remember: false
-      session_remember_absolute_timeout: 2592000
-      session_remember_cookie_name: remember
-      session_remember_rolling_timeout: 604800
-      session_request_headers: null
-      session_response_headers: null
-      session_rolling_timeout: 3600
-      session_secret: null
-      session_storage: cookie
-      session_store_metadata: false
-      session_strategy: default
-      ssl_verify: false
+      content_type: application/json
+      custom_fields_by_lua: []
+      flush_timeout: 2
+      headers:
+        Authorization: Splunk 1fef7417-3fe0-46a1-801b-04164660a59b
+      http_endpoint: https://prd-p-s3ws6.splunkcloud.com:8088/services/collector/raw
+      keepalive: 60000
+      method: POST
+      queue:
+        initial_retry_delay: 0.01
+        max_batch_size: 10
+        max_bytes: null
+        max_coalescing_delay: 1
+        max_entries: 10000
+        max_retry_delay: 60
+        max_retry_time: 60
+      queue_size: null
+      retry_count: null
       timeout: 10000
-      tls_client_auth_cert_id: null
-      tls_client_auth_ssl_verify: true
-      token_cache_key_include_scope: false
-      token_endpoint: null
-      token_endpoint_auth_method: null
-      token_exchange_endpoint: null
-      token_headers_client: null
-      token_headers_grants: null
-      token_headers_names: null
-      token_headers_prefix: null
-      token_headers_replay: null
-      token_headers_values: null
-      token_post_args_client: null
-      token_post_args_names: null
-      token_post_args_values: null
-      unauthorized_destroy_session: true
-      unauthorized_error_message: Unauthorized
-      unauthorized_redirect_uri: null
-      unexpected_redirect_uri: null
-      upstream_access_token_header: authorization:bearer
-      upstream_access_token_jwk_header: null
-      upstream_headers_claims: null
-      upstream_headers_names: null
-      upstream_id_token_header: null
-      upstream_id_token_jwk_header: null
-      upstream_introspection_header: null
-      upstream_introspection_jwt_header: null
-      upstream_refresh_token_header: null
-      upstream_session_id_header: null
-      upstream_user_info_header: null
-      upstream_user_info_jwt_header: null
-      userinfo_accept: application/json
-      userinfo_endpoint: null
-      userinfo_headers_client: null
-      userinfo_headers_names: null
-      userinfo_headers_values: null
-      userinfo_query_args_client: null
-      userinfo_query_args_names: null
-      userinfo_query_args_values: null
-      using_pseudo_issuer: false
-      verify_claims: true
-      verify_nonce: true
-      verify_parameters: false
-      verify_signature: true
     enabled: true
-    name: openid-connect
+    name: http-log
     protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
+      - grpc
+      - grpcs
+      - http
+      - https
+  - config:
+      allow:
+        - 49.249.17.98
+      deny: null
+      message: The service is currently unavailable.
+      status: null
+    enabled: true
+    name: ip-restriction
+    protocols:
+      - http
+      - https
+      - tcp
+      - tls
+      - grpc
+      - grpcs
   - config:
       day: null
       error_code: 429
@@ -472,82 +79,1182 @@ services:
       redis_ssl_verify: false
       redis_timeout: 2000
       redis_username: null
-      second: 10
+      second: 100
       year: null
     enabled: true
     name: rate-limiting
     protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
+      - grpc
+      - grpcs
+      - http
+      - https
   - config:
-      add:
-        body: []
-        headers: []
-        querystring: []
-      append:
-        body: []
-        headers: []
-        querystring: []
-      http_method: null
-      remove:
-        body: []
-        headers: []
-        querystring: []
-      rename:
-        body: []
-        headers: []
-        querystring: []
-      replace:
-        body: []
-        headers:
-        - 'Authorization: REPLACE'
-        querystring: []
-        uri: null
-    enabled: true
-    name: request-transformer
-    protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  - config:
-      allowed_payload_size: 10
+      allowed_payload_size: 100
       require_content_length: false
       size_unit: kilobytes
     enabled: true
     name: request-size-limiting
     protocols:
-    - grpc
-    - grpcs
-    - http
-    - https
-  port: 443
-  protocol: https
-  routes:
-  - id: cb41ec15-5e1e-5652-9180-c62bcc5768f7
-    methods:
-    - GET
-    name: student-api-v1_getstudents
-    paths:
-    - ~/v1/students$
-    plugins:
-    - config:
-        allow:
-        - UoS-group
-        deny: null
-        hide_groups_header: false
-        include_consumer_groups: false
-      enabled: true
-      name: acl
-      protocols:
       - grpc
       - grpcs
       - http
       - https
-    regex_priority: 200
-    strip_path: false
+services:
+  - host: integration.dev-api.shef.ac.uk
+    id: 79216cd4-341d-594f-8078-069057147ecf
+    name: student-api-v1-v2
+    path: /
+    plugins:
+      - config:
+          anonymous: null
+          hide_credentials: false
+          key_in_body: false
+          key_in_header: true
+          key_in_query: true
+          key_names:
+            - apikey
+          run_on_preflight: true
+        enabled: true
+        name: key-auth
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+          - ws
+          - wss
+      - config:
+          functions:
+            - |-
+              return function(status, body, headers)
+                  local new_body = {}
+
+                  if status == 400 then
+                      new_body = {
+                          code = 10000,
+                          description = "Required fields are missing or invalid data specified in the request. Please refer the swagger specification for more details",
+                          source = "Middleware",
+                          message = body.message,
+                          type = "Validation"
+                      }
+                  elseif status == 401 then
+                      new_body = {
+                          code = 10001,
+                          description = "Unauthorised request",
+                          source = "Middleware",
+                          message = body.message,
+                          type = "Validation"
+                      }
+                  elseif status == 403 then
+                      new_body = {
+                          code = 10002,
+                          description = "Forbidden request",
+                          source = "Middleware",
+                          message = body.message,
+                          type = "Validation"
+                      }
+                  elseif status == 500 then
+                      new_body = {
+                          code = 20000,
+                          description = "Internal Server Error",
+                          source = "Error",
+                          message = body.message,
+                          type = "Server error"
+                      }
+                elseif status == 503 then
+                      new_body = {
+                          code = 20000,
+                          description = "Internal Server Error",
+                          source = "Error",
+                          message = body.message,
+                          type = "System"
+                      }
+                  else
+                      -- For any other status codes, return the original body
+                      return status, body, headers
+                  end
+
+                  return status, new_body, headers
+              end
+        enabled: true
+        name: exit-transformer
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+      - config:
+          anonymous: null
+          audience: null
+          audience_claim:
+            - aud
+          audience_required: null
+          auth_methods:
+            - bearer
+          authenticated_groups_claim: null
+          authorization_cookie_domain: null
+          authorization_cookie_http_only: true
+          authorization_cookie_name: authorization
+          authorization_cookie_path: /
+          authorization_cookie_same_site: Default
+          authorization_cookie_secure: null
+          authorization_endpoint: null
+          authorization_query_args_client: null
+          authorization_query_args_names: null
+          authorization_query_args_values: null
+          authorization_rolling_timeout: 600
+          bearer_token_cookie_name: null
+          bearer_token_param_type:
+            - header
+            - query
+            - body
+          by_username_ignore_case: false
+          cache_introspection: true
+          cache_token_exchange: true
+          cache_tokens: true
+          cache_tokens_salt: dC1MclTHUAJ8SGzPH90fEMAFN4xFZ9yj
+          cache_ttl: 3600
+          cache_ttl_max: null
+          cache_ttl_min: null
+          cache_ttl_neg: null
+          cache_ttl_resurrect: null
+          cache_user_info: true
+          client_alg: null
+          client_arg: client_id
+          client_auth: null
+          client_credentials_param_type:
+            - header
+            - query
+            - body
+          client_id: []
+          client_jwk: null
+          client_secret: []
+          consumer_by:
+            - username
+            - custom_id
+          consumer_claim: null
+          consumer_optional: false
+          credential_claim:
+            - sub
+          disable_session: null
+          discovery_headers_names: null
+          discovery_headers_values: null
+          display_errors: false
+          domains: null
+          downstream_access_token_header: null
+          downstream_access_token_jwk_header: null
+          downstream_headers_claims: null
+          downstream_headers_names: null
+          downstream_id_token_header: null
+          downstream_id_token_jwk_header: null
+          downstream_introspection_header: null
+          downstream_introspection_jwt_header: null
+          downstream_refresh_token_header: null
+          downstream_session_id_header: null
+          downstream_user_info_header: null
+          downstream_user_info_jwt_header: null
+          enable_hs_signatures: false
+          end_session_endpoint: null
+          expose_error_code: true
+          extra_jwks_uris: null
+          forbidden_destroy_session: true
+          forbidden_error_message: Forbidden
+          forbidden_redirect_uri: null
+          groups_claim:
+            - groups
+          groups_required: null
+          hide_credentials: false
+          http_proxy: null
+          http_proxy_authorization: null
+          http_version: 1.1
+          https_proxy: null
+          https_proxy_authorization: null
+          id_token_param_name: null
+          id_token_param_type:
+            - header
+            - query
+            - body
+          ignore_signature: []
+          introspect_jwt_tokens: false
+          introspection_accept: application/json
+          introspection_check_active: true
+          introspection_endpoint: null
+          introspection_endpoint_auth_method: null
+          introspection_headers_client: null
+          introspection_headers_names: null
+          introspection_headers_values: null
+          introspection_hint: access_token
+          introspection_post_args_client: null
+          introspection_post_args_names: null
+          introspection_post_args_values: null
+          introspection_token_param_name: token
+          issuer: https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_pmhLhUYdx
+          issuers_allowed: null
+          jwt_session_claim: sid
+          jwt_session_cookie: null
+          keepalive: true
+          leeway: 0
+          login_action: upstream
+          login_methods:
+            - authorization_code
+          login_redirect_mode: fragment
+          login_redirect_uri: null
+          login_tokens:
+            - id_token
+          logout_methods:
+            - POST
+            - DELETE
+          logout_post_arg: null
+          logout_query_arg: null
+          logout_redirect_uri: null
+          logout_revoke: false
+          logout_revoke_access_token: true
+          logout_revoke_refresh_token: true
+          logout_uri_suffix: null
+          max_age: null
+          mtls_introspection_endpoint: null
+          mtls_revocation_endpoint: null
+          mtls_token_endpoint: null
+          no_proxy: null
+          password_param_type:
+            - header
+            - query
+            - body
+          preserve_query_args: false
+          proof_of_possession_auth_methods_validation: true
+          proof_of_possession_mtls: "off"
+          pushed_authorization_request_endpoint: null
+          pushed_authorization_request_endpoint_auth_method: null
+          redirect_uri: null
+          rediscovery_lifetime: 30
+          refresh_token_param_name: null
+          refresh_token_param_type:
+            - header
+            - query
+            - body
+          refresh_tokens: true
+          require_proof_key_for_code_exchange: null
+          require_pushed_authorization_requests: null
+          resolve_distributed_claims: false
+          response_mode: query
+          response_type:
+            - code
+          reverify: false
+          revocation_endpoint: null
+          revocation_endpoint_auth_method: null
+          revocation_token_param_name: token
+          roles_claim:
+            - roles
+          roles_required: null
+          run_on_preflight: true
+          scopes:
+            - openid
+          scopes_claim:
+            - scope
+          scopes_required: null
+          search_user_info: false
+          session_absolute_timeout: 86400
+          session_audience: default
+          session_compressor: none
+          session_cookie_domain: null
+          session_cookie_http_only: true
+          session_cookie_maxsize: 4000
+          session_cookie_name: session
+          session_cookie_path: /
+          session_cookie_renew: 600
+          session_cookie_same_site: Lax
+          session_cookie_secure: null
+          session_enforce_same_subject: false
+          session_hash_storage_key: false
+          session_hash_subject: false
+          session_idling_timeout: 900
+          session_memcached_host: 127.0.0.1
+          session_memcached_port: 11211
+          session_memcached_prefix: null
+          session_memcached_socket: null
+          session_redis_cluster_max_redirections: null
+          session_redis_cluster_nodes: null
+          session_redis_connect_timeout: null
+          session_redis_host: 127.0.0.1
+          session_redis_password: null
+          session_redis_port: 6379
+          session_redis_prefix: null
+          session_redis_read_timeout: null
+          session_redis_send_timeout: null
+          session_redis_server_name: null
+          session_redis_socket: null
+          session_redis_ssl: false
+          session_redis_ssl_verify: false
+          session_redis_username: null
+          session_remember: false
+          session_remember_absolute_timeout: 2592000
+          session_remember_cookie_name: remember
+          session_remember_rolling_timeout: 604800
+          session_request_headers: null
+          session_response_headers: null
+          session_rolling_timeout: 3600
+          session_secret: null
+          session_storage: cookie
+          session_store_metadata: false
+          session_strategy: default
+          ssl_verify: false
+          timeout: 10000
+          tls_client_auth_cert_id: null
+          tls_client_auth_ssl_verify: true
+          token_cache_key_include_scope: false
+          token_endpoint: null
+          token_endpoint_auth_method: null
+          token_exchange_endpoint: null
+          token_headers_client: null
+          token_headers_grants: null
+          token_headers_names: null
+          token_headers_prefix: null
+          token_headers_replay: null
+          token_headers_values: null
+          token_post_args_client: null
+          token_post_args_names: null
+          token_post_args_values: null
+          unauthorized_destroy_session: true
+          unauthorized_error_message: Unauthorized
+          unauthorized_redirect_uri: null
+          unexpected_redirect_uri: null
+          upstream_access_token_header: authorization:bearer
+          upstream_access_token_jwk_header: null
+          upstream_headers_claims: null
+          upstream_headers_names: null
+          upstream_id_token_header: null
+          upstream_id_token_jwk_header: null
+          upstream_introspection_header: null
+          upstream_introspection_jwt_header: null
+          upstream_refresh_token_header: null
+          upstream_session_id_header: null
+          upstream_user_info_header: null
+          upstream_user_info_jwt_header: null
+          userinfo_accept: application/json
+          userinfo_endpoint: null
+          userinfo_headers_client: null
+          userinfo_headers_names: null
+          userinfo_headers_values: null
+          userinfo_query_args_client: null
+          userinfo_query_args_names: null
+          userinfo_query_args_values: null
+          using_pseudo_issuer: false
+          verify_claims: true
+          verify_nonce: true
+          verify_parameters: false
+          verify_signature: true
+        enabled: true
+        name: openid-connect
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+      - config:
+          day: null
+          error_code: 429
+          error_message: API rate limit exceeded
+          fault_tolerant: true
+          header_name: null
+          hide_client_headers: false
+          hour: null
+          limit_by: consumer
+          minute: null
+          month: null
+          path: null
+          policy: local
+          redis_database: 0
+          redis_host: null
+          redis_password: null
+          redis_port: 6379
+          redis_server_name: null
+          redis_ssl: false
+          redis_ssl_verify: false
+          redis_timeout: 2000
+          redis_username: null
+          second: 10
+          year: null
+        enabled: true
+        name: rate-limiting
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+      - config:
+          add:
+            body: []
+            headers: []
+            querystring: []
+          append:
+            body: []
+            headers: []
+            querystring: []
+          http_method: null
+          remove:
+            body: []
+            headers: []
+            querystring: []
+          rename:
+            body: []
+            headers: []
+            querystring: []
+          replace:
+            body: []
+            headers:
+              - 'Authorization: REPLACE'
+            querystring: []
+            uri: null
+        enabled: true
+        name: request-transformer
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+      - config:
+          allowed_payload_size: 10
+          require_content_length: false
+          size_unit: kilobytes
+        enabled: true
+        name: request-size-limiting
+        protocols:
+          - grpc
+          - grpcs
+          - http
+          - https
+      - config:
+          allowed_header_parameters: Host,Content-Type,User-Agent,Accept,Content-Length
+          api_spec:
+            openapi: 3.0.0
+            info:
+              title: Student API v1 v2
+              description: "This API will retrieve student information based on studentId, firstname, lastname or studentType. The API supports pagination by using limit and offset query param. To fetch next pages, the only param needed is nextPageId. Any other params passed along with nextPageId will be ignored as nextPageId takes priority "
+              contact:
+                email: integrationteam@sheffield.ac.uk
+              version: 0.0.1
+            servers:
+              - url: https://integration.dev-api.shef.ac.uk
+                x-internal: true
+            tags:
+              - name: GetStudents
+                description: Get Students Information
+            paths:
+              /v1/students:
+                get:
+                  tags:
+                    - GetStudents
+                  summary: Retrieve student information
+                  description: Returns a list of student information.
+                  operationId: getStudents
+                  parameters:
+                    - $ref: '#/components/parameters/ContentTypeHeader'
+                    - $ref: '#/components/parameters/CorrelationIdHeader'
+                    - $ref: '#/components/parameters/RequestIdHeader'
+                    - $ref: '#/components/parameters/TimestampHeader'
+                    - name: studentId
+                      in: query
+                      description: unique student Id, if passed a single record will be fetched
+                      required: false
+                      schema:
+                        type: string
+                        pattern: '^[a-zA-Z0-9\s]*$'
+                        minLength: 1
+                        maxLength: 100
+                      example: "1001" # change here
+                    - name: firstname
+                      in: query
+                      description: Student firstname
+                      required: false
+                      schema:
+                        type: string
+                        pattern: '^[a-zA-Z0-9\s]*$'
+                        minLength: 1
+                        maxLength: 200
+                      example: smith
+                    - name: lastname
+                      in: query
+                      description: Student lastname
+                      required: false
+                      schema:
+                        type: string
+                        pattern: '^[a-zA-Z0-9\s]*$'
+                        minLength: 1
+                        maxLength: 200
+                      example: smith
+                    - name: studentType
+                      in: query
+                      description: student registration status
+                      required: false
+                      schema:
+                        type: string
+                        pattern: '^[a-zA-Z0-9\s]*$'
+                        minLength: 1
+                        maxLength: 200
+                      example: Attending
+                    - name: filterResponse
+                      in: query
+                      description: name of elements needed in response. For structured elements please use dot. to define the structure.  example students.title, students.forename, totalCountOfRecords
+                      required: false
+                      schema:
+                        type: string
+                        pattern: '^[a-zA-Z0-9\s.]*$'
+                        minLength: 1
+                        maxLength: 200
+                      example: students.forename
+                    - name: limit
+                      in: query
+                      description: limit the number of records
+                      required: false
+                      schema:
+                        type: integer
+                        format: int64
+                        minimum: 0
+                        maximum: 500
+                      example: 100
+                    - name: offset
+                      in: query
+                      description: offset the search result with the offset value
+                      required: false
+                      schema:
+                        type: integer
+                        format: int64
+                        minimum: 0
+                        maximum: 999999
+                      example: 100
+                    - name: nextPageId
+                      in: query
+                      description: this param can only be passed for second page and onwards only. This param will be returned in response from previous call and if this param is not populated then is no next page. Alternatively, limit and offset can be used at will.
+                      required: false
+                      schema:
+                        type: string
+                        pattern: '^[a-zA-Z0-9\s=.]*$'
+                        minLength: 1
+                        maxLength: 500
+                      example: bGltaXQ9MTAwJm9mZnNldD0yMDA
+                  responses:
+                    '200':
+                      description: A list of student information.
+                      headers:
+                        x-uos-request-id:
+                          $ref: '#/components/headers/x-uos-request-id'
+                        x-uos-correlation-id:
+                          $ref: '#/components/headers/x-uos-correlation-id'
+                        x-uos-timestamp:
+                          $ref: '#/components/headers/x-uos-timestamp'
+                        X-RateLimit-Limit:
+                          $ref: '#/components/headers/X-rateLimit-Limit'
+                        X-RateLimit-Remaining:
+                          $ref: '#/components/headers/X-rateLimit-Remaining'
+                        X-RateLimit-Reset:
+                          $ref: '#/components/headers/X-rateLimit-Reset'
+                        X-RateLimit-Reset-At:
+                          $ref: '#/components/headers/X-rateLimit-Reset-At'
+                        Access-Control-Allow-Origin:
+                          $ref: '#/components/headers/Access-Control-Allow-Origin'
+                      content:
+                        application/json:
+                          schema:
+                            type: object
+                            properties:
+                              students:
+                                type: array
+                                items:
+                                  $ref: '#/components/schemas/Student'
+                                minItems: 0
+                                maxItems: 1000
+                              totalCountOfRecords:
+                                type: integer
+                                format: int64
+                                minimum: 0
+                                maximum: 999999
+                                description: available number of records in the datastore. This is not the number of records returned in this response. The consumer can use limit and offset query param until this totalCountOfRecords is reached
+                                example: 1000
+                              nextPageId:
+                                type: string
+                                pattern: '^[a-zA-Z0-9\s=.]*$'
+                                minLength: 1
+                                maxLength: 500
+                                description: available number of records in the datastore. This is not the number of records returned in this response. The consumer can use limit and offset query param until this totalCountOfRecords is reached
+                                example: bGltaXQ9MTAwJm9mZnNldD0yMDA
+                    '400':
+                      description: Bad request
+                      headers:
+                        x-uos-request-id:
+                          $ref: '#/components/headers/x-uos-request-id'
+                        x-uos-correlation-id:
+                          $ref: '#/components/headers/x-uos-correlation-id'
+                        x-uos-timestamp:
+                          $ref: '#/components/headers/x-uos-timestamp'
+                        X-RateLimit-Limit:
+                          $ref: '#/components/headers/X-rateLimit-Limit'
+                        X-RateLimit-Remaining:
+                          $ref: '#/components/headers/X-rateLimit-Remaining'
+                        X-RateLimit-Reset:
+                          $ref: '#/components/headers/X-rateLimit-Reset'
+                        X-RateLimit-Reset-At:
+                          $ref: '#/components/headers/X-rateLimit-Reset-At'
+                        Access-Control-Allow-Origin:
+                          $ref: '#/components/headers/Access-Control-Allow-Origin'
+                      content:
+                        application/json:
+                          schema:
+                            $ref: '#/components/schemas/Error400'
+                    '401':
+                      description: Unauthorized
+                      headers:
+                        x-uos-request-id:
+                          $ref: '#/components/headers/x-uos-request-id'
+                        x-uos-correlation-id:
+                          $ref: '#/components/headers/x-uos-correlation-id'
+                        x-uos-timestamp:
+                          $ref: '#/components/headers/x-uos-timestamp'
+                        X-RateLimit-Limit:
+                          $ref: '#/components/headers/X-rateLimit-Limit'
+                        X-RateLimit-Remaining:
+                          $ref: '#/components/headers/X-rateLimit-Remaining'
+                        X-RateLimit-Reset:
+                          $ref: '#/components/headers/X-rateLimit-Reset'
+                        X-RateLimit-Reset-At:
+                          $ref: '#/components/headers/X-rateLimit-Reset-At'
+                        Access-Control-Allow-Origin:
+                          $ref: '#/components/headers/Access-Control-Allow-Origin'
+                      content:
+                        application/json:
+                          schema:
+                            $ref: '#/components/schemas/Error401'
+                    '429':
+                      description: Too Many Requests
+                      headers:
+                        x-uos-request-id:
+                          $ref: '#/components/headers/x-uos-request-id'
+                        x-uos-correlation-id:
+                          $ref: '#/components/headers/x-uos-correlation-id'
+                        x-uos-timestamp:
+                          $ref: '#/components/headers/x-uos-timestamp'
+                        X-RateLimit-Limit:
+                          $ref: '#/components/headers/X-rateLimit-Limit'
+                        X-RateLimit-Remaining:
+                          $ref: '#/components/headers/X-rateLimit-Remaining'
+                        X-RateLimit-Reset:
+                          $ref: '#/components/headers/X-rateLimit-Reset'
+                        X-RateLimit-Reset-At:
+                          $ref: '#/components/headers/X-rateLimit-Reset-At'
+                        Access-Control-Allow-Origin:
+                          $ref: '#/components/headers/Access-Control-Allow-Origin'
+                        Retry-After:
+                          description: Indicates how long to wait before retrying a request, in seconds
+                          schema:
+                            type: integer
+                            format: int32
+                            minimum: 0
+                            maximum: 99999
+                      content:
+                        application/json:
+                          schema:
+                            $ref: '#/components/schemas/Error429'
+                    '403':
+                      description: Forbidden
+                      headers:
+                        x-uos-request-id:
+                          $ref: '#/components/headers/x-uos-request-id'
+                        x-uos-correlation-id:
+                          $ref: '#/components/headers/x-uos-correlation-id'
+                        x-uos-timestamp:
+                          $ref: '#/components/headers/x-uos-timestamp'
+                        X-RateLimit-Limit:
+                          $ref: '#/components/headers/X-rateLimit-Limit'
+                        X-RateLimit-Remaining:
+                          $ref: '#/components/headers/X-rateLimit-Remaining'
+                        X-RateLimit-Reset:
+                          $ref: '#/components/headers/X-rateLimit-Reset'
+                        X-RateLimit-Reset-At:
+                          $ref: '#/components/headers/X-rateLimit-Reset-At'
+                        Access-Control-Allow-Origin:
+                          $ref: '#/components/headers/Access-Control-Allow-Origin'
+                      content:
+                        application/json:
+                          schema:
+                            $ref: '#/components/schemas/Error403'
+                    '500':
+                      description: Internal Server Error
+                      headers:
+                        x-uos-request-id:
+                          $ref: '#/components/headers/x-uos-request-id'
+                        x-uos-correlation-id:
+                          $ref: '#/components/headers/x-uos-correlation-id'
+                        x-uos-timestamp:
+                          $ref: '#/components/headers/x-uos-timestamp'
+                        Access-Control-Allow-Origin:
+                          $ref: '#/components/headers/Access-Control-Allow-Origin'
+                      content:
+                        application/json:
+                          schema:
+                            $ref: '#/components/schemas/Error500'
+                  security:
+                    - bearerAuth: ['uos/student-read', 'uos/student-read-all']
+                    - apiKey: []
+            components:
+              schemas:
+                Student:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: student title
+                      example: "Miss"
+                    forename:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: The student's forename.
+                      example: "Alice"
+                    lastname:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: The student's knownas name.
+                      example: "John"
+                    universityEmail:
+                      type: string
+                      format: email
+                      minLength: 1
+                      maxLength: 500
+                      description: The student's university email.
+                      example: "alice.smith@university.edu"
+                    studentType:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: The student's domain .
+                      enum:
+                        - Attending
+                        - Current
+                      example: "Attending"
+                Error400:
+                  type: object
+                  required:
+                    - code
+                    - description
+                    - message
+                    - source
+                    - type
+                  properties:
+                    code:
+                      type: number
+                      format: int64
+                      description: 5 digit error message code
+                      example: 10000
+                      enum:
+                        - 10000
+                    description:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s.]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Description for the 5 digit  message code.
+                      example: "Required fields are missing or invalid data specified in the request. Please refer to the API documentation for more details."
+                    source:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Source of the message
+                      example: "Middleware"
+                      enum:
+                        - Backend
+                        - Middleware
+                    message:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s_.]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Any message for the consuming system for use in UI or in the application
+                      example: "Invalid_JSON"
+                    type:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Type of the message
+                      example: "Validation"
+                      enum:
+                        - System
+                        - Business
+                        - Validation
+                Error401:
+                  type: object
+                  required:
+                    - code
+                    - description
+                    - message
+                    - source
+                    - type
+                  properties:
+                    code:
+                      type: number
+                      format: int64
+                      description: 5 digit error message code
+                      example: 10001
+                      enum:
+                        - 10001
+                    description:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Description for the 5 digit  message code.
+                      example: "Invalid Authorization Token or API Key Passed"
+                    source:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Source of the message
+                      example: Middleware
+                      enum:
+                        - Backend
+                        - Middleware
+                    message:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Any message for the consuming system for use in UI or in the application
+                      example: Unauthorized
+                    type:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Type of the message
+                      example: Validation
+                      enum:
+                        - System
+                        - Business
+                        - Validation
+                Error429:
+                  type: object
+                  required:
+                    - code
+                    - description
+                    - message
+                    - source
+                    - type
+                  properties:
+                    code:
+                      type: number
+                      description: 5 digit error message code
+                      example: 10002
+                      enum:
+                        - 10002
+                    description:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Description for the 5 digit  message code.
+                      example: Too Many Request For the API
+                    source:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Source of the message
+                      example: Middleware
+                      enum:
+                        - Backend
+                        - Middleware
+                    message:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Any message for the consuming system for use in UI or in the application
+                      example: Too Many Request Than Allowed Limit
+                    type:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Type of the message
+                      example: Validation
+                      enum:
+                        - System
+                        - Business
+                        - Validation
+                Error403:
+                  type: object
+                  required:
+                    - code
+                    - description
+                    - message
+                    - source
+                    - type
+                  properties:
+                    code:
+                      type: number
+                      format: int64
+                      description: 5 digit error message code
+                      example: 10000 # change here 
+                      enum:
+                        - 10000
+                    description:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Description for the 5 digit  message code.
+                      example: Invalid Token or API key
+                    source:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Source of the message
+                      example: Middleware
+                      enum:
+                        - Backend
+                        - Middleware
+                    message:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Any message for the consuming system for use in UI or in the application
+                      example: Forbidden
+                    type:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Type of the message
+                      example: Validation
+                      enum:
+                        - System
+                        - Business
+                        - Validation
+                Error500:
+                  type: object
+                  required:
+                    - code
+                    - description
+                    - message
+                    - source
+                    - type
+                  properties:
+                    code:
+                      type: number
+                      format: int64
+                      description: 5 digit  message code
+                      example: 20000
+                      enum:
+                        - 20000
+                    description:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Description for the 5 digit  message code.
+                      example: Internal Server Error
+                    source:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Source of the message
+                      example: Backend
+                      enum:
+                        - Backend
+                        - Middleware
+                    message:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Any message for the consuming system for use in UI or in the application
+                    type:
+                      type: string
+                      pattern: '^[a-zA-Z0-9\s]*$'
+                      minLength: 1
+                      maxLength: 500
+                      description: Type of the message
+                      example: System
+                      enum:
+                        - System
+                        - Business
+                        - Validation
+              headers:
+                x-uos-timestamp:
+                  description: Timestamp for when the API response was made.
+                  required: true
+                  schema:
+                    type: string
+                    minLength: 1
+                    maxLength: 500
+                    format: date-time
+                  example: 2023-10-26T15:22:10Z
+                x-uos-correlation-id:
+                  description: A unique identifier used by consumers or within the microservices layer in a business process journey.
+                  required: false
+                  schema:
+                    type: string
+                    pattern: '^[a-zA-Z0-9\s-]*$'
+                    minLength: 1
+                    maxLength: 100
+                x-uos-request-id:
+                  description: A unique identifier for the API request.
+                  required: true
+                  schema:
+                    type: string
+                    pattern: '^[a-zA-Z0-9\s]*$'
+                    minLength: 1
+                    maxLength: 100
+                X-rateLimit-Limit:
+                  description: Maximum number of requests allowed during a specified time window
+                  schema:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    maximum: 500
+                X-rateLimit-Remaining:
+                  description: Number of requests remaining in the current rate limit window
+                  schema:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    maximum: 500
+                X-rateLimit-Reset:
+                  description: Remaining time until the rate limit resets, in seconds
+                  schema:
+                    type: integer
+                    format: int64
+                    minimum: 0
+                    maximum: 500
+                X-rateLimit-Reset-At:
+                  description: Exact timestamp when the rate limit will reset
+                  schema:
+                    type: string
+                    format: date-time
+                    minLength: 1
+                    maxLength: 200
+                Access-Control-Allow-Origin:
+                  description: Indicates whether the response can be shared with requesting code from the given origin.
+                  schema:
+                    type: string
+                    pattern: '^[a-zA-Z0-9\s/*.]*$'
+                    minLength: 1
+                    maxLength: 200
+                    example: "*"
+              parameters:
+                ContentTypeHeader:
+                  name: Content-Type
+                  in: header
+                  required: true
+                  schema:
+                    type: string
+                    pattern: '^[a-zA-Z0-9\s/]*$'
+                    minLength: 1
+                    maxLength: 200
+                    default: application/json
+                    enum:
+                      - application/json
+                      - application/xml
+                CorrelationIdHeader:
+                  name: x-uos-correlation-id
+                  in: header
+                  required: false
+                  schema:
+                    type: string
+                    pattern: '^[a-zA-Z0-9\s-]*$'
+                    minLength: 1
+                    maxLength: 300
+                    description: A unique identifier used by consumers or within the microservices layer in a business process journey.
+                    example: e29b-41d4-a716-44665544000
+                RequestIdHeader:
+                  name: x-uos-request-id
+                  in: header
+                  required: true
+                  schema:
+                    type: string
+                    pattern: '^[a-zA-Z0-9\s-]*$'
+                    minLength: 5
+                    maxLength: 300
+                    description: A unique identifier for the API request.
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                TimestampHeader:
+                  name: x-uos-timestamp
+                  in: header
+                  required: true
+                  schema:
+                    type: string
+                    minLength: 1
+                    maxLength: 500
+                    description: Timestamp for when the API request was made.
+                    format: date-time
+                    example: 2023-10-26T15:22:10Z
+              securitySchemes:
+                bearerAuth:
+                  type: oauth2
+                  flows:
+                    clientCredentials:
+                      tokenUrl: https://example.com/oauth2/token
+                      refreshUrl: https://example.com/oauth2/token
+                      scopes:
+                        uos/student-read: Read student information
+                        uos/student-read-all: Read all student information
+                  description: This security scheme also utilizes JSON Web Tokens (JWT) for authentication. It explicitly supports RFC8725 to ensure proper security measures are followed. This security scheme uses OAuth 2.0 for authentication with the client credentials flow. Access tokens obtained through this flow do not support refresh tokens, and they may expire after a certain period. However, if your OAuth provider supports token refreshing for this grant type, you can use the refresh URL provide.
+                apiKey:
+                  type: apiKey
+                  in: header
+                  name: x-api-key
+          header_parameter_check: false
+          include_base_path: false
+          notify_only_request_validation_failure: false
+          notify_only_response_body_validation_failure: false
+          query_parameter_check: false
+          validate_request_body: true
+          validate_request_header_params: true
+          validate_request_query_params: true
+          validate_request_uri_params: true
+          validate_response_body: false
+          verbose_response: true
+        enabled: true
+        name: oas-validation
+        protocols:
+          - http
+          - https
+    port: 443
+    protocol: https
+    routes:
+      - id: 8db89c11-8865-5d88-b39e-66aec64b94c3
+        methods:
+          - GET
+        name: student-api-v1-v2_getstudents
+        paths:
+          - ~/v1/students$
+        plugins:
+          - config:
+              allow:
+                - UoS-group
+              deny: null
+              hide_groups_header: false
+              include_consumer_groups: false
+            enabled: true
+            name: acl
+            protocols:
+              - grpc
+              - grpcs
+              - http
+              - https
+        regex_priority: 200
+        strip_path: false
+        tags: []
     tags: []
-  tags: []
 upstreams: []
