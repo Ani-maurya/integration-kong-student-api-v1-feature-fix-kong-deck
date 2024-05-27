@@ -1,0 +1,28 @@
+
+{
+    "extends": [
+        "https://unpkg.com/@stoplight/spectral-owasp-ruleset/dist/ruleset.mjs",
+        "spectral:oas",
+        "spectral:asyncapi"
+    ],
+    "rules": {
+        "validate-method": {
+            "description": "PUT Method not allowed.",
+            "given": "$.paths[*].put",
+            "severity": "error",
+            "then": {
+                "field": "put",
+                "function": "truthy"
+            }
+        },
+        "validate-regex": {
+            "description": "Regex Pattern not allowed.",
+            "given": "$.paths[*].*.parameters[?(@.type == 'string' && @.pattern)]",
+            "severity": "error",
+            "then": {
+                "field": "pattern",
+                "function": "falsy"
+            }
+        }
+    }
+}

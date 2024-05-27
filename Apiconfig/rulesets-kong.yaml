@@ -1,0 +1,42 @@
+rules:
+# Kong configuration files
+  service-https-check:
+    description: "Ensure https usage in Kong GW Services"
+    given: $.services[*].protocol
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        match: "^https$"
+  svc-plugin-check:
+    description: "Ensure all plugins present are part of the whitelist for Kong GW Services"
+    given: "$.services[*].plugins[*].name"
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        match: "exit-transformer|openid-connect|rate-limiting|request-size-limiting|key-auth|request-transformer"
+  svc-plugin-check-check-list:
+    description: "Ensure all plugins present are enabled for Kong GW Services"
+    given: "$.services[*].plugins[*].enabled"
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        match: "^true$"
+  global-plugin-check:
+    description: "Ensure all plugins present are part of the whitelist for Kong GW at global level"
+    given: "$.plugins[*].name"
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        match: "correlation-id|http-log|ip-restriction|rate-limiting|request-size-limiting"
+  global-plugin-check-check-list:
+    description: "Ensure all plugins present are enabled for Kong GW at global level"
+    given: "$.plugins[*].enabled"
+    severity: error
+    then:
+      function: pattern
+      functionOptions:
+        match: "^true$"        
