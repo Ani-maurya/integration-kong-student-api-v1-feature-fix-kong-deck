@@ -1214,6 +1214,7 @@ services:
                   type: apiKey
                   in: header
                   name: x-api-key
+          api_spec_encoded: true
           header_parameter_check: false
           include_base_path: false
           notify_only_request_validation_failure: false
