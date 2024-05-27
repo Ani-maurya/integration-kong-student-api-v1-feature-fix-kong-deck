@@ -15,7 +15,7 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: "exit-transformer|openid-connect|rate-limiting|request-size-limiting|key-auth|request-transformer"
+        match: "oas-validation|exit-transformer|openid-connect|rate-limiting|request-size-limiting|key-auth|request-transformer"
   svc-plugin-check-check-list:
     description: "Ensure all plugins present are enabled for Kong GW Services"
     given: "$.services[*].plugins[*].enabled"
