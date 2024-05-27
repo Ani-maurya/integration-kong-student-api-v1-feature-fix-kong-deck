@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Student API v1
+  title: Student API v1 v2
   description: "This API will retrieve student information based on studentId, firstname, lastname or studentType. The API supports pagination by using limit and offset query param. To fetch next pages, the only param needed is nextPageId. Any other params passed along with nextPageId will be ignored as nextPageId takes priority "
   contact:
     email: integrationteam@sheffield.ac.uk
