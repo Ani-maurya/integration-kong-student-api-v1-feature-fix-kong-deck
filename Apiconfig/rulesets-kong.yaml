@@ -15,7 +15,7 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: "oas-validation|exit-transformer|openid-connect|rate-limiting|request-size-limiting|key-auth|request-transformer"
+        match: "http-log|oas-validation|exit-transformer|openid-connect|rate-limiting|request-size-limiting|key-auth|request-transformer"
   svc-plugin-check-check-list:
     description: "Ensure all plugins present are enabled for Kong GW Services"
     given: "$.services[*].plugins[*].enabled"
@@ -31,7 +31,7 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: "correlation-id|http-log|ip-restriction|rate-limiting|request-size-limiting"
+        match: "correlation-id|ip-restriction|rate-limiting|request-size-limiting"
   global-plugin-check-check-list:
     description: "Ensure all plugins present are enabled for Kong GW at global level"
     given: "$.plugins[*].enabled"
